@@ -2,7 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 
-from shared.database import build_mysql_url, make_engine, make_session_factory
+from shared.database import build_mysql_url, make_engine, make_session_factory, Base
 from .models import Course
 
 load_dotenv()
@@ -18,6 +18,7 @@ db_url = build_mysql_url(
 engine = make_engine(db_url)
 SessionLocal = make_session_factory(engine)
 
+Base.metadata.create_all(bind=engine)
 
 COURSES = [
     {

@@ -29,23 +29,9 @@ def build_router(SessionLocal):
     ):
         return list_courses(db, program)
 
-    @router.get("/{course_id}", response_model=CourseOut)
-    def get_one(course_id: int, db: Session = Depends(get_db)):
-        c = get_course(db, course_id)
-        if not c:
-            raise HTTPException(status_code=404, detail="Course not found")
-        return c
-
     @router.post("/", response_model=CourseOut)
     def create(payload: CourseIn, db: Session = Depends(get_db)):
         return create_course(db, payload.model_dump())
-
-    @router.delete("/{course_id}", response_model=dict)
-    def remove(course_id: int, db: Session = Depends(get_db)):
-        ok = delete_course(db, course_id)
-        if not ok:
-            raise HTTPException(status_code=404, detail="Course not found")
-        return {"deleted": True}
 
     @router.post("/progress", response_model=CourseProgressOut)
     def update_progress(
@@ -82,5 +68,19 @@ def build_router(SessionLocal):
         if not result:
             raise HTTPException(status_code=404, detail="No progress found")
         return result
+
+    @router.get("/{course_id}", response_model=CourseOut)
+    def get_one(course_id: int, db: Session = Depends(get_db)):
+        c = get_course(db, course_id)
+        if not c:
+            raise HTTPException(status_code=404, detail="Course not found")
+        return c
+
+    @router.delete("/{course_id}", response_model=dict)
+    def remove(course_id: int, db: Session = Depends(get_db)):
+        ok = delete_course(db, course_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Course not found")
+        return {"deleted": True}
 
     return router

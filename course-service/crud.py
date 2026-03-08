@@ -118,7 +118,7 @@ def get_latest_progress(db: Session, user_id: str):
     progress = (
         db.query(CourseProgress)
         .filter(CourseProgress.user_id == user_id)
-        .order_by(CourseProgress.id.desc())
+        .order_by(CourseProgress.updated_at.desc(), CourseProgress.id.desc())
         .first()
     )
     if not progress:
