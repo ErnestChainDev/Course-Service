@@ -15,6 +15,7 @@ from .crud import (
     delete_course,
     save_progress,
     get_latest_progress,
+    list_progress_history,
 )
 
 
@@ -68,6 +69,18 @@ def build_router(SessionLocal):
         if not result:
             raise HTTPException(status_code=404, detail="No progress found")
         return result
+    
+    @router.get("/progress/history", response_model=list[CourseProgressOut])
+    def progress_history(
+        request: Request,
+        limit: int = Query(default=10, ge=1, le=50),
+        db: Session = Depends(get_db),
+    ):
+        user_id = (request.headers.get("X-User-ID") or "").strip()
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Missing X-User-ID header")
+
+        return list_progress_history(db, user_id, limit)
 
     @router.get("/{course_id}", response_model=CourseOut)
     def get_one(course_id: int, db: Session = Depends(get_db)):

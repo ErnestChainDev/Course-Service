@@ -66,6 +66,27 @@ def delete_course(db: Session, course_id: int) -> bool:
     db.commit()
     return True
 
+def get_latest_progress(db: Session, user_id: str):
+    progress = (
+        db.query(CourseProgress)
+        .filter(CourseProgress.user_id == user_id)
+        .order_by(CourseProgress.updated_at.desc(), CourseProgress.id.desc())
+        .first()
+    )
+    if not progress:
+        return None
+    return _serialize_progress(progress)
+
+def list_progress_history(db: Session, user_id: str, limit: int = 10):
+    items = (
+        db.query(CourseProgress)
+        .filter(CourseProgress.user_id == user_id)
+        .order_by(CourseProgress.updated_at.desc(), CourseProgress.id.desc())
+        .limit(limit)
+        .all()
+    )
+    return [_serialize_progress(item) for item in items]
+
 
 def save_progress(
     db: Session,
@@ -111,16 +132,4 @@ def save_progress(
 
     db.commit()
     db.refresh(progress)
-    return _serialize_progress(progress)
-
-
-def get_latest_progress(db: Session, user_id: str):
-    progress = (
-        db.query(CourseProgress)
-        .filter(CourseProgress.user_id == user_id)
-        .order_by(CourseProgress.updated_at.desc(), CourseProgress.id.desc())
-        .first()
-    )
-    if not progress:
-        return None
     return _serialize_progress(progress)
